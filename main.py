@@ -115,8 +115,9 @@ class AnalysisResponse(BaseModel):
 # Endpoint principal
 @app.post("/predict", response_model=AnalysisResponse)
 async def predict_dengue(file: UploadFile = File(...)):
-    if not file.filename.endswith('.csv'):
-        raise HTTPException(status_code=400, detail="Solo archivos CSV permitidos")
+    # Aceptamos tanto .csv como .xlsx
+    if not file.filename.endswith(('.csv', '.xlsx')):
+        raise HTTPException(status_code=400, detail="Solo archivos CSV o Excel (.xlsx) permitidos")
     
     content = await file.read()
     cases_series = load_dengue_data_from_csv(content)
