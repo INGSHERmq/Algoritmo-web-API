@@ -33,7 +33,7 @@ if file:
             # ¡¡¡LÍNEA MÁGICA QUE ARREGLA TODO!!!
             files = {"file": (file.name, file.getvalue(), file.type or "application/octet-stream")}
             headers = {}  # no hace falta Content-Type, requests lo pone solo
-            response = requests.post(API_URL, files=files, headers=headers, timeout=30)
+            response = requests.post(API_URL, files=files, headers=headers, timeout=90)
 
             if response.status_code == 200:
                 r = response.json()["results"]
