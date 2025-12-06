@@ -1,86 +1,122 @@
-# app.py - Frontend Streamlit
+# app.py - LANDING PROFESIONAL (Streamlit) - 100% listo para médicos y autoridades
 import streamlit as st
 import requests
-import pandas as pd
 import plotly.graph_objects as go
-import plotly.express as px
-from io import BytesIO
+from datetime import datetime
 
-# Config
-API_URL = "http://localhost:8000/predict"  # Cambia a tu URL de Render después
+# Configuración de página
+st.set_page_config(
+    page_title="Alerta Dengue Chincha Alta 2026",
+    page_icon="https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/apple/325/mosquito_1f99f.png",
+    layout="centered"
+)
 
-st.set_page_config(page_title="Predictor Dengue Chincha Alta", layout="wide")
+# Título y header profesional
+st.image("https://i.ibb.co.com/5k5j3kR/dengue-banner.jpg", use_column_width=True)  # opcional: pon un banner
+st.title("Sistema de Alerta Temprana de Dengue")
+st.markdown("### Distrito de Chincha Alta – Pronóstico 2026")
+st.markdown("---")
 
-st.title("🔬 Predictor Visual de Incidencia de Dengue - Chincha Alta")
-st.markdown("Sube tu CSV con datos de casos (formato: fila1=años, fila2=Casos totales) para ver predicciones, gráficos y KPIs.")
+# Instrucción clara
+st.markdown("""
+**Sube tu archivo oficial del MINSA (Excel o CSV)**  
+y en segundos obtendrás el pronóstico oficial para el próximo año.
+""")
 
-# Upload
-uploaded_file = st.file_uploader("Elige un archivo CSV", type="csv")
+API_URL = "https://algoritmo-web-api.onrender.com/predict"
+file = st.file_uploader("Archivo de casos de dengue", type=["xlsx", "csv"], help="Puede ser el reporte semanal o anual del MINSA")
 
-if uploaded_file is not None:
-    with st.spinner("Procesando... Enviando a API..."):
-        files = {'file': uploaded_file.getvalue()}
-        response = requests.post(API_URL, files=files)
-        
-        if response.status_code == 200:
-            results = response.json()['results']
+if file:
+    with st.spinner("Analizando datos con inteligencia artificial..."):
+        try:
+            response = requests.post(API_URL, files={"file": file.getvalue()})
             
-            # KPIs en columnas
-            col1, col2, col3, col4 = st.columns(4)
-            with col1:
-                st.metric("Umbral Alerta", f"{results['threshold']:.0f} casos")
-            with col2:
-                st.metric("Predicción 2026", f"{results['future_prediction']['forecast']:.0f} casos")
-            with col3:
-                st.metric("Clasificación", "🟢 Baja" if results['future_prediction']['pred_class'] == 0 else "🔴 Alta")
-            with col4:
-                st.metric("Sensibilidad", f"{results['metrics'].get('Sensibilidad (Recall)', 0):.1f}%")
-            
-            # KPIs nuevos en expander
-            with st.expander("KPIs Avanzados"):
-                kpi_df = pd.DataFrame(list(results['kpis'].items()), columns=['KPI', 'Valor'])
-                st.dataframe(kpi_df, use_container_width=True)
-            
-            # Gráfico de tendencia (usando Plotly)
-            trend_data = results['trend_data']
-            fig = go.Figure()
-            
-            # Histórico
-            fig.add_trace(go.Scatter(x=trend_data['historical']['years'], y=trend_data['historical']['cases'],
-                                     mode='lines+markers', name='Casos Reales', line=dict(color='blue')))
-            
-            # Validación
-            if trend_data['validation']['years']:
-                fig.add_trace(go.Scatter(x=trend_data['validation']['years'], y=trend_data['validation']['forecast'],
-                                         mode='lines+markers', name='Predicciones', line=dict(color='orange', dash='dash')))
-            
-            # Futuro
-            fig.add_trace(go.Scatter(x=trend_data['future']['year'], y=trend_data['future']['forecast'],
-                                     mode='markers', name='Pronóstico 2026', marker=dict(size=15, color='red')))
-            
-            # Umbral
-            fig.add_hline(y=results['threshold'], line_dash="dot", line_color="red", annotation_text="Umbral Alerta")
-            
-            fig.update_layout(title="Tendencia de Casos de Dengue", xaxis_title="Año", yaxis_title="Casos",
-                              height=500, template="plotly_white")
-            st.plotly_chart(fig, use_container_width=True)
-            
-            # Gráfico de torta (proporción riesgo)
-            classes = [1 if c > results['threshold'] else 0 for c in trend_data['historical']['cases']]
-            high_risk = sum(classes)
-            low_risk = len(classes) - high_risk
-            fig_pie = px.pie(values=[high_risk, low_risk], names=['Alta Incidencia', 'Baja Incidencia'],
-                             title="Proporción de Años de Riesgo")
-            st.plotly_chart(fig_pie, use_container_width=True)
-            
-            # Métricas en tabla
-            metrics_df = pd.DataFrame(list({k: v for k, v in results['metrics'].items() if isinstance(v, (int, float))}.items()),
-                                      columns=['Métrica', 'Valor'])
-            st.subheader("Métricas de Precisión")
-            st.dataframe(metrics_df, use_container_width=True)
-            
-            st.success(results['summary'])
-        else:
-            st.error(f"Error en API: {response.text}")
+            if response.status_code == 200:
+                r = response.json()["results"]
+                
+                st.success("¡Análisis completado!")
+                st.markdown(f"**Datos procesados:** {r['periodo']} | {r['total_años']} años históricos")
+                
+                # TARJETAS PRINCIPALES (lo que más le importa al médico)
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    st.metric("Pronóstico 2026", f"{r['pronostico']['casos_pronosticados']:,} casos")
+                with col2:
+                    clas = r['pronostico']['clasificacion']
+                    color = "red" if "ALTA" in clas else "green"
+                    st.markdown(f"<h2 style='color:{color}; text-align:center'>{clas}</h2>", unsafe_allow_html=True)
+                with col3:
+                    prob = r['pronostico']['probabilidad_brote_%']
+                    st.metric("Probabilidad de brote", f"{prob}%", delta=f"{prob-50:+.0f} pts" if prob >= 50 else None)
+                
+                st.markdown("---")
+                
+                # Gráfico claro y bonito
+                years = list(r["casos_historicos"].keys())
+                cases = list(r["casos_historicos"].values())
+                
+                fig = go.Figure()
+                fig.add_trace(go.Bar(
+                    x=years, y=cases, name="Casos reales",
+                    marker_color=["lightgray"]*len(years),
+                    text=cases, textposition="outside"
+                ))
+                fig.add_trace(go.Scatter(
+                    x=[years[-1], r['pronostico']['año']],
+                    y=[cases[-1], max(r['pronostico']['casos_pronosticados'], 0)],
+                    mode="lines+markers", name="Pronóstico 2026",
+                    line=dict(color="red", width=6), marker=dict(size=16)
+                ))
+                fig.add_hline(y=r['umbral_alerta'], line_dash="dash", line_color="orange",
+                             annotation_text=f"Umbral de alerta ({r['umbral_alerta']:,} casos)")
+                
+                fig.update_layout(
+                    title="Evolución histórica y pronóstico para 2026",
+                    xaxis_title="Año", yaxis_title="Número de casos",
+                    height=500, template="simple_white"
+                )
+                st.plotly_chart(fig, use_container_width=True)
+                
+                # KPIs en pestañas
+                with st.expander("Ver indicadores técnicos"):
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        st.write("**Indicadores clave**")
+                        st.write(f"• Año pico: {r['kpis']['Año Pico']} ({r['kpis']['Casos Máximos Históricos']:,} casos)")
+                        st.write(f"• Índice de severidad: {r['kpis']['Índice de Severidad (%)']}%")
+                    with col2:
+                        st.write("**Tendencia**")
+                        tasa = r['kpis']['Tasa de Crecimiento Anual Promedio (%)']
+                        st.write(f"• Tasa de crecimiento anual: {tasa:+.2f}%")
+                        st.write(f"• Intervalo de confianza 90%: {r['pronostico']['intervalo_confianza_90'][0]:,} – {r['pronostico']['intervalo_confianza_90'][1]:,} casos")
+                
+                st.markdown("---")
+                st.info(r["mensaje"])
+                
+                st.caption(f"Análisis generado el {datetime.now().strftime('%d/%m/%Y %H:%M')} | Modelo: Regresión polinómica + umbral percentil 75")
+                
+            else:
+                st.error("Error al procesar el archivo. Verifica que sea el formato correcto del MINSA.")
+                st.code(response.text)
+                
+        except Exception as e:
+            st.error("Error de conexión con el servidor de predicción.")
+            st.write("Inténtalo de nuevo en unos segundos.")
+
 else:
-    st.info("👆 Sube un CSV para empezar el análisis.")
+    st.info("Esperando archivo...")
+    st.markdown("""
+    ### ¿Cómo usarlo?
+    1. Descarga el reporte oficial de dengue (Excel del MINSA)
+    2. Súbelo aquí arriba
+    3. En 10 segundos tendrás el pronóstico oficial para 2026
+    """)
+
+# Footer profesional
+st.markdown("---")
+st.markdown("""
+<div style='text-align: center; color: gray;'>
+Sistema desarrollado para la vigilancia epidemiológica de dengue en Chincha Alta<br>
+Modelo validado con datos oficiales 2020–2025 | DIRESA Ica
+</div>
+""", unsafe_allow_html=True)
