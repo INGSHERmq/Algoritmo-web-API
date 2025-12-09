@@ -17,7 +17,7 @@ st.markdown("""
 <style>
     /* Fondo sólido claro para mejor legibilidad */
     .stApp {
-        background: #f8fafc;
+        background: #ffffff;
     }
     
     /* Tarjetas con sombra y bordes redondeados */
@@ -30,15 +30,24 @@ st.markdown("""
     
     /* Título principal */
     h1 {
-        color: #1e3a8a;
+        color: #1e3a8a !important;
         text-align: center;
         font-weight: 700;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        text-shadow: none;
     }
     
     /* Subtítulos */
     h3 {
-        color: #475569;
+        color: #1e3a8a !important;
+    }
+    
+    h4 {
+        color: #1e3a8a !important;
+    }
+    
+    /* Asegurar que todos los textos sean visibles */
+    p, span, div, label {
+        color: #334155 !important;
     }
     
     /* Botones y elementos interactivos */
@@ -58,10 +67,25 @@ st.markdown("""
         padding: 10px;
     }
     
+    /* Nombre del archivo subido visible */
+    .uploadedFileName {
+        color: #1e3a8a !important;
+        font-weight: 600 !important;
+    }
+    
     /* Mejorar contraste en elementos de Streamlit */
     .stFileUploader label {
         color: #1e3a8a !important;
         font-weight: 600 !important;
+    }
+    
+    .stFileUploader div[data-testid="stFileUploaderDropzone"] {
+        background-color: #f8fafc !important;
+        border: 2px dashed #3b82f6 !important;
+    }
+    
+    .stFileUploader div[data-testid="stFileUploaderDropzoneInput"] {
+        color: #1e3a8a !important;
     }
     
     /* Tabs con mejor contraste */
@@ -72,13 +96,13 @@ st.markdown("""
     }
     
     .stTabs [data-baseweb="tab"] {
-        color: #475569 !important;
+        color: #1e3a8a !important;
         font-weight: 600;
     }
     
     .stTabs [aria-selected="true"] {
         color: #1e3a8a !important;
-        background-color: #e0f2fe !important;
+        background-color: #dbeafe !important;
         border-radius: 8px;
     }
     
@@ -265,20 +289,32 @@ if file:
                             'text': "Evolución Histórica y Pronóstico de Casos de Dengue",
                             'x': 0.5,
                             'xanchor': 'center',
-                            'font': {'size': 20, 'color': '#1e3a8a', 'family': 'Arial Black'}
+                            'font': {'size': 20, 'color': '#1e3a8a', 'family': 'Arial'}
                         },
                         height=550,
-                        plot_bgcolor='rgba(0,0,0,0)',
+                        plot_bgcolor='white',
                         paper_bgcolor='white',
                         xaxis_title="Año",
                         yaxis_title="Número de Casos",
                         hovermode='x unified',
+                        font=dict(color='#1e3a8a', size=12),
+                        xaxis=dict(
+                            showgrid=True,
+                            gridcolor='#e2e8f0',
+                            tickfont=dict(color='#1e3a8a', size=12)
+                        ),
+                        yaxis=dict(
+                            showgrid=True,
+                            gridcolor='#e2e8f0',
+                            tickfont=dict(color='#1e3a8a', size=12)
+                        ),
                         legend=dict(
                             orientation="h",
                             yanchor="bottom",
                             y=1.02,
                             xanchor="right",
-                            x=1
+                            x=1,
+                            font=dict(color='#1e3a8a', size=12)
                         )
                     )
                     st.plotly_chart(fig, use_container_width=True)
@@ -304,10 +340,12 @@ if file:
                         title={
                             'x': 0.5,
                             'xanchor': 'center',
-                            'font': {'size': 20, 'color': '#1e3a8a', 'family': 'Arial Black'}
+                            'font': {'size': 20, 'color': '#1e3a8a', 'family': 'Arial'}
                         },
                         height=500,
-                        paper_bgcolor='white'
+                        paper_bgcolor='white',
+                        font=dict(color='#1e3a8a', size=12),
+                        legend=dict(font=dict(color='#1e3a8a', size=12))
                     )
                     st.plotly_chart(fig_pie, use_container_width=True)
                     
