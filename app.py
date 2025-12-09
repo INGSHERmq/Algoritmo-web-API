@@ -15,9 +15,9 @@ st.set_page_config(
 # CSS personalizado para mejorar el diseño
 st.markdown("""
 <style>
-    /* Fondo degradado sutil */
+    /* Fondo sólido claro para mejor legibilidad */
     .stApp {
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        background: #f8fafc;
     }
     
     /* Tarjetas con sombra y bordes redondeados */
@@ -51,11 +51,35 @@ st.markdown("""
         font-weight: 600;
     }
     
-    /* Área de carga de archivos */
+    /* Área de carga de archivos con fondo blanco */
     .uploadedFile {
-        background: white;
+        background: white !important;
         border-radius: 10px;
         padding: 10px;
+    }
+    
+    /* Mejorar contraste en elementos de Streamlit */
+    .stFileUploader label {
+        color: #1e3a8a !important;
+        font-weight: 600 !important;
+    }
+    
+    /* Tabs con mejor contraste */
+    .stTabs [data-baseweb="tab-list"] {
+        background-color: white;
+        padding: 10px;
+        border-radius: 10px;
+    }
+    
+    .stTabs [data-baseweb="tab"] {
+        color: #475569 !important;
+        font-weight: 600;
+    }
+    
+    .stTabs [aria-selected="true"] {
+        color: #1e3a8a !important;
+        background-color: #e0f2fe !important;
+        border-radius: 8px;
     }
     
     /* Información destacada */
@@ -113,12 +137,18 @@ with st.container():
 
 API_URL = "https://algoritmo-web-api.onrender.com/predict"
 
-# Área de carga de archivo con mejor diseño
-st.markdown("<h4 style='color:#1e3a8a;'>📁 Cargar datos oficiales</h4>", unsafe_allow_html=True)
+# Área de carga de archivo con mejor diseño y contraste
+st.markdown("""
+<div style='background:white; padding:20px; border-radius:15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom:30px;'>
+    <h4 style='color:#1e3a8a; margin-bottom:15px;'>📁 Cargar datos oficiales</h4>
+</div>
+""", unsafe_allow_html=True)
+
 file = st.file_uploader(
     "Selecciona el archivo de casos de dengue", 
     type=["xlsx", "csv"],
-    help="Formatos aceptados: Excel (.xlsx) o CSV (.csv)"
+    help="Formatos aceptados: Excel (.xlsx) o CSV (.csv)",
+    label_visibility="collapsed"
 )
 
 if file:
